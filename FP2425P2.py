@@ -20,7 +20,7 @@ def cria_posicao(col, lin):
 def obtem_pos_col(pos):
 
     """
-    A função obtem_pos_col recebe uma posição e devolve a coluna correspondente.
+    A função obtem_pos_col recebe uma posição e devolve a letra da coluna correspondente.
     O argumento pos é do tipo str.
     A função retorna a coluna da posição, que é do tipo str.
     """
@@ -30,14 +30,14 @@ def obtem_pos_col(pos):
 def obtem_pos_lin(pos):
 
     """
-    A função obtem_pos_lin recebe uma posição e devolve a linha correspondente.
+    A função obtem_pos_lin recebe uma posição e devolve o número da linha correspondente.
     O argumento pos é do tipo str.
     A função retorna a linha da posição, que é do tipo int.
     """
 
     return int(pos[1:])
 
-def eh_posicao(arg):
+def eh_posicao(arg): # Tratar de mais coisas
 
     """
     A função eh_posicao recebe um argumento e verifica se é uma posição válida.
@@ -45,7 +45,7 @@ def eh_posicao(arg):
     A função retorna um valor booleano.
     """
 
-    return isinstance(arg, str) and arg[0] in letras_col and 1 <= arg[1] <= 10
+    return isinstance(arg, str) and arg[0] in letras_col and 1 <= arg[1:] <= 10 
 
 def posicoes_iguais(p1, p2):
 
@@ -93,6 +93,36 @@ def indice_coluna_posicao_aux(letra_coluna):
 
     return ord(letra_coluna) - ord("a")
 
+def indice_orbita_aux(posicao, n):
+
+    """
+    A função indice_orbita_aux é uma função auxiliar que recebe uma posição e o número de órbitas.
+    Os argumentos posicao e n são do tipo string e inteiro.
+    A função retorna o índice da órbita onde se encontra a posicao (ou seja, do tipo inteiro).
+    NOTA: A orbital interior é a de índice 0.
+    """
+
+    col = obtem_pos_col(posicao)
+    lin = obtem_pos_lin(posicao)
+    index_coluna_pos = indice_coluna_posicao_aux(col)
+    index_linha_pos = indice_linha_posicao_aux(lin)
+    tamanho_lado = tamanho_lado_tabuleiro_aux(n)
+    
+    # A posição surge como índice da linha, índice da coluna.
+    posicao = (index_linha_pos, index_coluna_pos)
+
+    # Descobrir a orbital da posição.
+    # Dividindo o tabuleiro ao meio, obtemos a posição espelhada.
+    # A posição espelhada é a posição que está tabuleiro.
+    posicao_espelhada = (min(posicao[0], tamanho_lado - 1 - posicao[0]), min(posicao[1], tamanho_lado - 1 - posicao[1]))
+
+    posicao_diagonal_invertida = (min(posicao_espelhada[0], posicao_espelhada[1]), min(posicao_espelhada[0], posicao_espelhada[1])) 
+    orbita_invertida = posicao_diagonal_invertida[0]
+    orbita = n - orbita_invertida - 1
+
+    return orbita
+
+
 def tamanho_lado_tabuleiro_aux(n):
 
     """
@@ -110,8 +140,11 @@ def eh_posicao_valida(p, n):
     Os argumentos são do tipo str e int, respetivamente.
     A função retorna um valor booleano.
     """
+    col = obtem_pos_col(p)
+    lin = obtem_pos_lin(p)
+    index_coluna_p = indice_coluna_posicao_aux(col)
 
-    return 0 < obtem_pos_lin(p) <= 2 * n and 2 <= n <= 5
+    return 0 < lin <= 2 * n and  0 < index_coluna_p <= 2 * n and 2 <= n <= 5
 
 def obtem_posicoes_adjacentes(p, n, d):
 
@@ -171,55 +204,45 @@ def ordena_posicoes(t, n):
         lin = obtem_pos_lin(p)
         index_coluna_pos = indice_coluna_posicao_aux(col)
         index_linha_pos = indice_linha_posicao_aux(lin)
-        tamanho_lado = tamanho_lado_tabuleiro_aux(n)
+        orbital = indice_orbita_aux(p, n)
 
-        posicao = (index_linha_pos, index_coluna_pos)
-        posicao_espelhada = (min(posicao[0], tamanho_lado - 1 - posicao[0]), min(posicao[1], tamanho_lado - 1 - posicao[1]))
-        posicao_diagonal = (min(posicao_espelhada[0], posicao_espelhada[1]), min(posicao_espelhada[0], posicao_espelhada[1])) 
-        orbital_invertida = posicao_diagonal[0]
-        orbital = n - orbital_invertida - 1 
-
-        return (orbital, index_linha_pos, index_coluna_pos)
+        return (orbital, index_linha_pos, index_coluna_pos) # ordem de prioridade de ordenação de posições
     
-
     tuplo_ordenado = sorted(t, key = lambda x: computa_valores(x, n))
 
-
     return tuplo_ordenado
-
-    #tuplo_distancias = sorted(tuplo_distancias, key = lambda x: (x[1], x[0]))
 
 
 # 2.º TAD
 
-pedras = ('O', 'X', ' ') # tuplo com todas as pedras possíveis
+pedras = (-1, 1, 0) # tuplo com todas as pedras possíveis
 
 def cria_pedra_branca():
 
     """
     A função cria_pedra_branca cria uma pedra branca.
-    A função retorna uma posição com a string "O".
+    A função retorna o valor da pedra branca, ou seja, um inteiro.
     """
 
-    return pedras[0]
+    return -1
 
 def cria_pedra_preta():
 
     """
     A função cria_pedra_preta cria uma pedra preta.
-    A função retorna uma posição com a string "X".
+    A função retorna o valor da pedra preta, ou seja, um inteiro.
     """
 
-    return pedras[1]
+    return 1
 
 def cria_pedra_neutra():
 
     """
     A função cria_pedra_neutra cria uma pedra neutra.
-    A função retorna uma posição com a string " ".
+    A função retorna o valor da pedra neutra, ou seja, um inteiro.
     """
 
-    return pedras[2]
+    return 0
 
 def eh_pedra(arg):
 
@@ -234,26 +257,27 @@ def eh_pedra_branca(p):
 
     """
     A função eh_pedra_branca recebe uma pedra e verifica se é branca.
-    O argumento p é do tipo str.
+    O argumento p é do tipo int.
     A função retorna um valor booleano.
     """
 
-    return p == 'O'
+    return p == -1
 
 def eh_pedra_preta(p):
 
     """
     A função eh_pedra_preta recebe uma pedra e verifica se é preta.
+    O argumento p é do tipo int.
     A função retorna um valor booleano.
     """
 
-    return p == 'X'
+    return p == 1
 
 def pedras_iguais(p1, p2):
 
     """
     A função pedras_iguais recebe duas pedras e verifica se são iguais.
-    Os argumentos são do tipo str.
+    Os argumentos são do tipo int.
     A função retorna um valor booleano.
     """
 
@@ -263,13 +287,13 @@ def pedra_para_str(p):
 
     """
     A função pedra_para_str recebe uma pedra e devolve a pedra em formato de string.
-    O argumento p é do tipo str.
+    O argumento p é do tipo int.
     A função retorna a pedra do jogador em formato de string.
     """
 
     return ('O' if eh_pedra_branca(p) else 'X' if eh_pedra_preta(p) else ' ')
 
-def eh_pedra_jogador(p):
+def eh_pedra_jogador(p): 
     
     """
     A função eh_pedra_jogador recebe uma pedra e verifica se é de um jogador.
@@ -277,7 +301,7 @@ def eh_pedra_jogador(p):
     A função retorna um valor booleano.
     """
 
-    return p in ('O', 'X')
+    return p in (1, -1) 
 
 def pedra_para_int(p):
 
@@ -301,13 +325,18 @@ def cria_tabuleiro_vazio(n):
     A função verifica se o argumento é válido, caso contrário, devolve um erro.
     """
 
-    tabuleiro = {} 
+    tabuleiro_final = {} 
+
     if not(isinstance(n, int) and 2 <= n <= 5):
         raise ValueError('cria_tabuleiro_vazio: argumento invalido')
-    for index_letras in range(0, len(letras_col) + 1):
-        for index_linhas in range(1, n * 2 + 1):
-            tabuleiro[cria_posicao(letras_col[index_letras], index_linhas)] = cria_pedra_neutra()
-    return tabuleiro
+    
+    for index_col in range(0, (2 * n)):
+        tabuleiro_linhas = {}
+        for index_lin in range (1, ( 2 * n) + 1):
+            tabuleiro_linhas[index_lin] = cria_pedra_neutra()
+        tabuleiro_final[letras_col[index_col]] = tabuleiro_linhas
+
+    return tabuleiro_final
 
 def cria_tabuleiro(n, tp, tb):
 
@@ -322,12 +351,27 @@ def cria_tabuleiro(n, tp, tb):
     
     if not (isinstance(tp, tuple) and isinstance(tb, tuple) and 2 <= n <= 5):
         raise ValueError('cria_tabuleiro: argumentos invalidos')
+    
+    for p in tp:
 
-    for pedras_tp in range(0, len(tp) + 1):
-        tabuleiro[tp[pedras_tp]] = cria_pedra_preta() # cria o tabulerio com as pedras pretas
+        col = obtem_pos_col(p)
+        lin = obtem_pos_lin(p)
+        index_lin = indice_linha_posicao_aux(lin)
+        index_col = indice_coluna_posicao_aux(col)
 
-    for pedras_tb in range(0, len(tb) + 1):
-        tabuleiro[tb[pedras_tb]] = cria_pedra_branca() # cria o tabuleiro com as pedras brancas
+        tabuleiro[letras_col[index_col]][index_lin + 1] = cria_pedra_preta()
+    
+    for p in tb:
+
+        col = obtem_pos_col(p)
+        lin = obtem_pos_lin(p)
+        index_lin = indice_linha_posicao_aux(lin)
+        index_col = indice_coluna_posicao_aux(col)
+
+        tabuleiro[letras_col[index_col]][index_lin + 1]= cria_pedra_branca()
+
+    return tabuleiro
+
 
 def cria_copia_tabuleiro(t):
 
@@ -337,7 +381,13 @@ def cria_copia_tabuleiro(t):
     A função retorna um dicionário, cópia do tabuleiro, t.
     """
 
-    t_novo = t
+    t_novo = {} 
+
+    for col in t:
+        t_novo[col] = {}
+        for lin in t[col]:
+            t_novo[col][lin] = t[col][lin]
+
     return t_novo
 
 def obtem_numero_orbitas(t):
@@ -348,7 +398,7 @@ def obtem_numero_orbitas(t):
     A função retorna um inteiro, número de órbitas.
     """
 
-    return (len(t) // 4) ** 1/2
+    return len(t) // 2
 
 def obtem_pedra(t, p):
 
@@ -358,4 +408,509 @@ def obtem_pedra(t, p):
     A função retorna a pedra do tabuleiro na posição p, que é do tipo str.
     """
 
-    return str(t[p])
+    col = obtem_pos_col(p)
+    lin = obtem_pos_lin(p)
+
+    return t[col][lin]
+
+def obtem_linha_horizontal(t, p):
+
+    """
+    A função obtem_linha_horizontal recebe um tabuleiro e uma posição.
+    Os argumentos são do tipo dict e str, respetivamente.
+    A função retorna um tuplo com as posições, e respetivos valores, da linha onde se encontra a posição.
+    """
+
+    tuplo_posicoes_horizontal = ()
+    lin = obtem_pos_lin(p)
+
+    for index_coluna in range(0, len(t)):
+        posicao = cria_posicao(letras_col[index_coluna], lin)
+        valor = obtem_pedra(t, posicao)
+        tuplo_posicao_valor = ((posicao, valor),)
+        tuplo_posicoes_horizontal += tuplo_posicao_valor
+
+    return tuplo_posicoes_horizontal
+
+def obtem_linha_vertical(t, p): 
+
+    """
+    A função obtem_linha_vertical recebe um tabuleiro e uma posição.
+    Os argumentos são do tipo dict e str, respetivamente.
+    A função retorna um tuplo com as posições, e respetivos valores, da coluna onde se encontra a posição.
+    """
+
+    col = obtem_pos_col(p)
+    tuplo_posicoes_vertical = ()
+
+    for linha in range(1, len(t) + 1):
+        posicao = cria_posicao(col, linha)
+        valor = obtem_pedra(t, posicao)
+        tuplo_posicoes_vertical += ((posicao, valor),)
+
+    return tuplo_posicoes_vertical
+
+def obtem_linhas_diagonais(t, p):
+
+    """
+    A função obtem_linhas_diagonais recebe um tabuleiro e uma posição.
+    Os argumentos são do tipo dict e str, respetivamente.
+    A função retorna um tuplo com as posições, e respetivos valores, das diagonais e antidiagonais onde se encontra a posição.
+    """
+
+    col = obtem_pos_col(p)
+    lin = obtem_pos_lin(p)
+
+    pos_index = (indice_coluna_posicao_aux(col), indice_linha_posicao_aux(lin)) # tuplo com os índices da linha da posição (pos) e da coluna da posição (pos).
+
+    pos_inicial_index = pos_index
+    fora_tab = False
+
+    # calcular posicao inicial
+    while not fora_tab:
+        pos_inicial_index = (pos_inicial_index[0] - 1, pos_inicial_index[1] - 1) 
+        if not ( 0 <= pos_inicial_index[0] < len(t) and 0 <= pos_inicial_index[1] < len(t) ): # Verificar se o índice está dentro dos limites.
+            fora_tab = True
+
+    pos_atual_index = pos_inicial_index
+    fora_tab = False
+
+    # criar diagonal
+    tuplo_diagonais = ()
+    while not fora_tab:
+        pos_atual_index = (pos_atual_index[0] + 1, pos_atual_index[1] + 1)
+        if not ( 0 <= pos_atual_index[0] < len(t) and 0 <= pos_atual_index[1] < len(t) ):
+            fora_tab = True
+            continue # Interrompe a iteração atual e continua para a próxima iteração
+        pos_nova_col = letras_col[pos_atual_index[0]]
+        pos_nova_lin = pos_atual_index[1] + 1
+        pos_nova = cria_posicao(pos_nova_col, pos_nova_lin)
+        valor = obtem_pedra(t, pos_nova)
+        tuplo_diagonais += ((pos_nova, valor),)
+
+    pos_inicial_index = pos_index
+    fora_tab = False
+
+    # calcular posicao inicial 
+    while not fora_tab:
+        pos_inicial_index = (pos_inicial_index[0] - 1, pos_inicial_index[1] + 1)
+        if not ( 0 <= pos_inicial_index[0] < len(t) and 0 <= pos_inicial_index[1] < len(t) ):
+            fora_tab = True
+
+    pos_atual_index = pos_inicial_index
+    fora_tab = False
+
+    # criar antidiagonal
+    tuplo_antidiagonais = ()
+    while not fora_tab:
+        pos_atual_index = (pos_atual_index[0] + 1, pos_atual_index[1] - 1) # Atualização dos índices da linha e da coluna, contrário das diagonais, fazemos menos uma linha.
+        if not ( 0 <= pos_atual_index[0] < len(t) and 0 <= pos_atual_index[1] < len(t) ):
+            fora_tab = True
+            continue
+
+        pos_nova_col = letras_col[pos_atual_index[0]]
+        pos_nova_lin = pos_atual_index[1] + 1
+        pos_nova = cria_posicao(pos_nova_col, pos_nova_lin)
+        valor = obtem_pedra(t, pos_nova)
+        tuplo_antidiagonais += ((pos_nova, valor),)
+
+    return (tuplo_diagonais, tuplo_antidiagonais)
+
+tuplo_quadrantes = ((True, False), (True, True), (False, True), (False, False))
+tuplo_quadrante_movimentos = (
+    ((1, 0),(0, 1)),
+    ((-1, 0),(0, 1)),
+    ((-1, 0), (0, -1)),
+    ((1, 0), (0, -1)))
+
+def obtem_orbita(t, p):
+
+    """
+    A função obtem_orbita é uma função auxiliar que recebe um tabuleiro e uma posição.
+    Os argumentos são do tipo dict e str, respetivamente.
+    A função retorna um tuplo com as posições da órbita onde se encontra a posição. 
+    """
+
+    col = obtem_pos_col(p)
+    lin = obtem_pos_lin(p)
+    n = obtem_numero_orbitas(t)
+
+    index_coluna = indice_coluna_posicao_aux(col)
+    index_linha = indice_linha_posicao_aux(lin)
+    index_orbita = indice_orbita_aux(p,n)
+
+    tamanho_lado = tamanho_lado_tabuleiro_aux(obtem_numero_orbitas(t))
+
+
+    posicao_inicial_index = (index_coluna, index_linha)
+    posicao_atual_index = posicao_inicial_index
+    posicoes_orbita = ()
+    while posicao_atual_index != posicao_inicial_index or len(posicoes_orbita) == 0:
+        
+        index_linha_passa_metade = posicao_atual_index[1] >= (tamanho_lado // 2)
+        index_coluna_passa_metade = posicao_atual_index[0] >= (tamanho_lado // 2) 
+
+        tuplo_index_passa_metade = (index_coluna_passa_metade, index_linha_passa_metade)
+
+        quadrante = tuplo_quadrantes.index(tuplo_index_passa_metade)
+        movimentos = tuplo_quadrante_movimentos[quadrante]
+
+        for movimento in movimentos:
+            posicao_nova_index = (posicao_atual_index[0] + movimento[0], posicao_atual_index[1] + movimento[1])
+
+            if not (0 <= posicao_nova_index[0] < tamanho_lado and 0 <= posicao_nova_index[1] < tamanho_lado):
+                continue
+
+            posicao_nova = cria_posicao(letras_col[posicao_nova_index[0]], posicao_nova_index[1] + 1)
+            index_orbita_posicao_nova = indice_orbita_aux(posicao_nova, n)
+
+            if index_orbita_posicao_nova == index_orbita:
+                posicoes_orbita += (posicao_nova, )
+                posicao_atual_index = posicao_nova_index
+                break
+
+    return posicoes_orbita
+
+
+def obtem_posicoes_pedra(t, j):
+
+    """
+    A função obtem_posicoes_pedra recebe um tabuleiro e uma pedra.
+    Os argumentos são do tipo dict e int, respetivamente.
+    A função retorna um tuplo com as posições onde se encontra a pedra.
+    """
+    tuplo_posicoes_j = ()
+    n = obtem_numero_orbitas(t)
+
+    for coluna in t:
+        for linha in t[coluna]:
+            if t[coluna][linha] == j:
+                tuplo_posicoes_j += (cria_posicao(coluna, linha),)
+
+    return ordena_posicoes(tuplo_posicoes_j, n)
+
+def coloca_pedra(t, j, p):
+
+    """
+    A função coloca_pedra recebe um tabuleiro, uma posição, e uma pedra e coloca a pedra na posição.
+    Os argumentos são do tipo dict, int e str, respetivamente.
+    A função retorna um dicionário, tabuleiro, com a pedra colocada na posição.
+    """
+
+    col_j = obtem_pos_col(j)
+    lin_j = obtem_pos_lin(j)
+
+    t[col_j][lin_j] = p
+
+    return t
+    
+
+def remove_pedra(t, p):
+
+    """
+    A função remove_pedra recebe um tabuleiro e uma posição e remove a pedra da posição.
+    Os argumentos são do tipo dict e str, respetivamente.
+    A função retorna um dicionário, tabuleiro, com a pedra removida da posição.
+    """
+
+    col_p = obtem_pos_col(p)
+    lin_p = obtem_pos_lin(p)
+
+    t[col_p][lin_p] = cria_pedra_neutra()
+
+    return t
+
+def eh_tabuleiro(arg):
+
+    """
+    A função eh_tabuleiro recebe um argumento e verifica se é um tabuleiro válido.
+    O argumento arg é do tipo universal.
+    A função retorna um valor booleano.
+    """
+
+    if not (isinstance(arg, dict) and 4 <= len(arg) <= 10):
+        return False
+    
+    for col in arg:
+        if not (col in letras_col and isinstance(arg[col], dict) and 4 <= len(arg[col]) <= 10):
+            return False
+        for lin in arg[col]:
+            if not (1 <= lin <= 10 and eh_pedra(arg[col][lin])):
+                return False
+    return True
+        
+
+def tabuleiros_iguais(t1, t2):
+
+    """
+    A função tabuleiros_iguais recebe dois tabuleiros e verifica se são iguais.
+    Os argumentos são do tipo dict.
+    A função retorna um valor booleano.
+    """
+
+    if not eh_tabuleiro(t1) or not eh_tabuleiro(t2):
+        return False
+    
+    if t1.keys() != t2.keys():
+        return False
+    
+    for col in t1:
+        if t1[col].keys() != t2[col].keys():
+            return False
+        for lin in t1[col]:
+            if t1[col][lin] != t2[col][lin]:
+                return False
+            
+    return True
+                    
+
+def tabuleiro_para_str(t):
+
+    """
+    A função tabuleiro_para_str recebe um tabuleiro e devolve o tabuleiro em formato de string.
+    O argumento t é do tipo dict.
+    A função retorna o tabuleiro em formato de string.
+    """
+
+    representacao_tab = ''
+    n = obtem_numero_orbitas(t)
+
+
+    linha_colunas = '   '.join(t.keys())
+    representacao_tab += '    ' + linha_colunas + '\n'
+    separador_linhas = '    ' + '   '.join(map(lambda x: '|', t.keys())) + '\n'
+
+    for linha in range(1, 2 * n + 1):
+
+        posicoes_formatadas = []
+        for coluna in t:
+            posicoes_formatadas += ['[' + pedra_para_str(t[coluna][linha]) + ']']
+
+        representacao_tab += f"{linha:02}" + ' ' + '-'.join(posicoes_formatadas) + '\n' 
+        if linha < 2 * n:
+            representacao_tab += separador_linhas
+    
+    representacao_tab = representacao_tab.rstrip()
+    return representacao_tab
+
+def move_pedra(t, p1, p2):
+
+    """
+    A função move_pedra recebe um tabuleiro e duas posições e move a pedra da primeira posição para a segunda.
+    Os argumentos são do tipo dict e str.
+    A função retorna um dicionário, tabuleiro, com a pedra movida.
+    """
+    # primeira posição:
+    col_p1 = obtem_pos_col(p1)
+    lin_p1 = obtem_pos_lin(p1)
+    index_lin_p1 = indice_linha_posicao_aux(lin_p1)
+    index_col_p1 = indice_coluna_posicao_aux(col_p1)
+
+    col_p2 = obtem_pos_col(p2)
+    lin_p2 = obtem_pos_lin(p2)
+    index_lin_p2 = indice_linha_posicao_aux(lin_p2)
+    index_col_p2 = indice_coluna_posicao_aux(col_p2)
+
+    t[index_col_p2][index_lin_p2] = t[index_col_p1][index_lin_p1]
+    t[index_col_p1][index_lin_p1] = cria_pedra_neutra()
+
+    return t
+
+def obtem_posicao_seguinte(t, p, s):
+
+    """
+    A função obtem_posicao_seguinte recebe um tabuleiro, uma posição e um booleano.
+    Os argumentos são do tipo dict, str e bool.
+    Se a condição s for True, a função devolve a posição seguinte no sentido horário.
+    Caso contrário, devolve a posição seguinte no sentido anti-horário.
+    A função retorna a posição seguinte, que é do tipo str.
+    """
+
+    orbita_posicao = obtem_orbita(t, p)
+    index_orbita_posicao = orbita_posicao.index(p)
+
+    variacao = 1 if s else -1
+    index_posicao_seguinte = (index_orbita_posicao + variacao) % len(orbita_posicao)
+
+    return orbita_posicao[index_posicao_seguinte]
+
+def roda_tabuleiro(t):
+
+    """
+    A função roda_tabuleiro recebe um tabuleiro e roda todas as posições uma posição no sentido anti-horário.
+    O argumento t é do tipo dict.
+    A função retorna um dicionário, tabuleiro, com as novas posições.
+    """
+    backup_tabuleiro = cria_copia_tabuleiro(t)
+
+    for col in backup_tabuleiro:
+        for linha in backup_tabuleiro[col]:
+            posicao_atual = cria_posicao(col, linha)
+            posicao_seguinte = obtem_posicao_seguinte(backup_tabuleiro, posicao_atual, False)
+            pedra = obtem_pedra(backup_tabuleiro, posicao_atual)
+
+            t = coloca_pedra(t, posicao_seguinte, pedra)
+
+    return t
+
+def verifica_linha_pedras(t, p, j, k):
+
+    """
+    A função verifica_linha_pedras recebe um tabuleiro, uma posição, uma pedra e um inteiro.
+    A função verifica se existem k pedras seguidas na linha (horizontal, vertical, diagonal) da posição.
+    Os argumentos são do tipo dict, str, str e int, respetivamente.
+    A função retorna um valor booleano.
+    """
+
+    linha_pos = obtem_linha_horizontal(t, p)
+    coluna_pos = obtem_linha_vertical(t, p)
+    diagonais_antidiagonais = obtem_linhas_diagonais(t, p)
+    diagonal_pos = diagonais_antidiagonais[0]
+    antidiagonal_pos = diagonais_antidiagonais[1]
+    posicoes_jog = obtem_posicoes_pedra(t, j)
+
+    def conta_pecas_consecutivas_aux(elementos):
+
+        """
+        
+        A função conta_pecas_consecutivas é uma função auxiliar à função verifica_linhas_pedras que recebe um argumento (elementos).
+        A função devolve um booleano:
+            True se existirem k ou mais peças consecutivas do jogador (j) e False caso contrário.
+        
+        """
+
+        contador = 0
+        passou_posicao = False
+
+        for (posicao_atual, _) in elementos: # Procurar no elemento se existem k ou mais peças do jogador.
+            if posicao_atual == p:
+                passou_posicao = True
+
+            if posicao_atual in posicoes_jog:
+                contador += 1
+            else:
+                contador = 0
+                passou_posicao = False
+
+            if contador >= k and passou_posicao:
+                return True
+        return False
+    
+    # Chamar a função conta_pecas_consecutivas para as linhas, colunas, diagonais e antidiagonais.
+    if conta_pecas_consecutivas_aux(linha_pos) or conta_pecas_consecutivas_aux(coluna_pos) or conta_pecas_consecutivas_aux(diagonal_pos) or conta_pecas_consecutivas_aux(antidiagonal_pos):
+        return True
+    else:
+        return False
+
+def eh_vencedor(t, j):
+
+    """
+    A função eh_vencedor recebe um tabuleiro e um jogador e verifica se o jogador é vencedor.
+    O jogador é vencedor se tiver uma linha completa com as suas pedras.
+    Os argumentos são do tipo dict e str, respetivamente.
+    A função retorna um valor booleano.
+    """
+    posicoes_jogador = obtem_posicoes_pedra(t, j)
+    n = obtem_numero_orbitas(t)
+    tamanho_lado = tamanho_lado_tabuleiro_aux(n)
+
+    for posicao in posicoes_jogador:
+        if verifica_linha_pedras(t,posicao, j, tamanho_lado):
+            return True
+    return False
+
+def eh_fim_jogo(t):
+
+    """
+    A função eh_fim_jogo recebe um tabuleiro e verifica se o jogo terminou.
+    O jogo termina se um dos jogadores for vencedor ou se não existirem posições vazias.
+    O argumento t é do tipo dict.
+    A função retorna um valor booleano.
+    """
+
+    for j in (cria_pedra_branca(), cria_pedra_preta()):
+        if eh_vencedor(t, j):
+            return True
+
+    for col in t:
+        for lin in t[col]:
+            if t[col][lin] == 0:
+                return False
+            
+    return True
+            
+def posicoes_livres_aux(t):
+
+    """
+    A função posicoes_livres_aux é uma função auxiliar, que recebe um tabuleiro e devolve um tuplo com as posições livres.
+    O argumento t é do tipo dict.
+    A função retorna um tuplo com as posições livres, que são do tipo str.
+    """
+    posicoes_livres = ()
+    for coluna in t:
+        for linha in t[coluna]:
+            if t[coluna][linha] == cria_pedra_neutra():
+                posicoes_livres += (cria_posicao(coluna, linha),)
+
+    return posicoes_livres
+
+def escolhe_movimento_manual(t):
+
+    """
+    A função escolhe_movimento_manual recebe um tabuleiro.
+    O argumento t é do tipo dict.
+    A função retorna uma string com a posições válida escolhida pelo jogador.
+    """
+
+    posicao_valida = False # Inicialização da variável que verifica se a posição é válida.
+    while not posicao_valida: 
+        posicao_esolhida = input('Escolha uma posicao livre:') # Mensagem ao jogador.
+        if posicao_esolhida in posicoes_livres_aux(t): # Verificação da posição introduzida.
+            return posicao_para_str(posicao_esolhida)
+
+def escolhe_movimento_auto(t, j, lvl):
+
+    """
+    A função escolhe_movimento_auto recebe um tabuleiro, uma pedra e uma estratégia.
+    Os argumentos são do tipo dict, str e str, respetivamente.
+    A função retorna uma string com a posição válida escolhida automaticamente.
+    """
+
+    def estrategia_escolhida_facil_aux():
+
+        """
+        A função estrategia_facil_aux é uma função auxiliar à função escolhe_movimento_auto.
+        A função retorna um tuplo com as posições que satisfazem as condições da estratégia fácil.
+        ESPECIFICIDADES DA ESTRATÉGIA FÁCIL:
+        - Se existir pelo menos uma posição (após rotação) que fique adjacente a uma pedra do jogador, a função escolhe essa posição.
+        - Caso contrário, a função escolhe uma posição livre.
+        """
+
+        pass
+
+
+    def estrategia_escolhida_normal_aux():
+
+        """
+        A função estrategia_normal_aux é uma função auxiliar à função escolhe_movimento_auto.
+        A função retorna um tuplo com as posições que satisfazem as condições da estratégia normal.
+        ESPECIFICIDADES DA ESTRATÉGIA NORMAL:
+        - É determinado o maior valor de L <= k, tal que o jogador consiga colocar L peças consecutivas:
+            - Se existir, pelo menos, uma posição que após rotação permita obter uma linha com L peças consecutivas:
+                - A função escolhe essa posição.
+            - Caso contrário, a função escolhe uma posição que impossibilite o adversário de obter uma linha com L peças consecutivas.     
+        """
+
+        pass
+
+    pass
+
+def orbito(n, modo, jog):
+
+    """
+    A função orbito é a função principal do jogo Orbito.
+    A função orbito recebe o número de órbitas, o modo de jogo e o jogador.
+    Os argumentos são do tipo int, str e str, respetivamente.
+    """
+
+    pass
