@@ -372,8 +372,15 @@ def cria_tabuleiro(n, tp, tb):
     A função retorna um dicionário, que representa um tabuleiro com as posições das pedras.
     A função verifica se os argumentos são válidos, caso contrário, devolve um erro.
     """
+
+    condicao_tuplos = (type(tp) == tuple and type(tb) == tuple and 2 <= n <= 5)
+    condicao_tuplo_pretas = all(eh_posicao(elemento) for elemento in tp)
+    condicao_tuplo_brancas = all(eh_posicao(elemento) for elemento in tb)
+
+    eh_posicao_valida
+
     
-    if not (type(tp) == tuple and type(tb) == tuple and 2 <= n <= 5):
+    if not (condicao_tuplos and condicao_tuplo_pretas and condicao_tuplo_brancas):
         raise ValueError('cria_tabuleiro: argumentos invalidos')
     
     tabuleiro = cria_tabuleiro_vazio(n)
