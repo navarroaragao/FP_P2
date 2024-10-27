@@ -313,6 +313,20 @@ def pedra_para_int(p):
 
     return (-1 if eh_pedra_branca(p) else 1 if eh_pedra_preta(p) else 0)
 
+def str_para_pedra(str):
+
+    """
+    A função str_para_pedra recebe uma string e devolve a pedra correspondente.
+    O argumento str é do tipo str.
+    A função retorna a pedra do jogador em formato de string.
+    """
+    pedra_preta = cria_pedra_preta()
+    if pedra_para_str(pedra_preta) == str:
+        return pedra_preta
+    pedra_branca = cria_pedra_branca()
+    if pedra_para_str(pedra_branca) == str:
+        return pedra_branca
+    return cria_pedra_neutra()
 
 # 3.º TAD
 
@@ -886,8 +900,28 @@ def escolhe_movimento_auto(t, j, lvl):
         - Caso contrário, a função escolhe uma posição livre.
         """
 
-        pass
+        copia_tabuleiro = cria_copia_tabuleiro(t) # Cópia do tabuleiro.
+        tabuleiro_rodado = roda_tabuleiro(copia_tabuleiro) # Rodar o tabuleiro.
+        posicoes_livres = posicoes_livres_aux(tabuleiro_rodado) # Obter as posições livres.
+        posicoes_jog = obtem_posicoes_pedra(tabuleiro_rodado, j) # Obter as posições do jogador. 
+        tuplo_posicoes_adj_jog = () # Tuplo que vai conter as posições adjacentes às posições do jogador. 
+        n = obtem_numero_orbitas(t)
 
+        for posicao_jog in posicoes_jog:
+            posicoes_adj_jog = obtem_posicoes_adjacentes(posicao_jog, n, True) # Obter as posições adjacentes às posições do jogador.
+            for posicao_adj_jog in posicoes_adj_jog:
+                if posicao_adj_jog in posicoes_livres: # Verificar se a posição adjacente está livre.
+                    tuplo_posicoes_adj_jog += (posicao_adj_jog,)
+
+        posicoes_escolhidas = ()
+        if len(tuplo_posicoes_adj_jog) != 0:
+            posicoes_escolhidas = tuplo_posicoes_adj_jog     
+        else:
+            posicoes_escolhidas = posicoes_livres
+
+        posicoes_convertidas = map(lambda x: obtem_posicao_seguinte(tabuleiro_rodado, x, True), posicoes_escolhidas)
+
+        return ordena_posicoes(posicoes_convertidas, n)
 
     def estrategia_escolhida_normal_aux():
 
@@ -900,10 +934,61 @@ def escolhe_movimento_auto(t, j, lvl):
                 - A função escolhe essa posição.
             - Caso contrário, a função escolhe uma posição que impossibilite o adversário de obter uma linha com L peças consecutivas.     
         """
+        
+        copia_tabuleiro_l = cria_copia_tabuleiro(t) # Cópia do tabuleiro.
+        tabuleiro_rodado_l = roda_tabuleiro(copia_tabuleiro_l) # Rodar o tabuleiro.
+        copia_tabuleiro_adv = cria_copia_tabuleiro(tabuleiro_rodado_l) 
+        tabuleiro_rodado_adv = roda_tabuleiro(copia_tabuleiro_adv) # Rodar o tabuleiro duas vezes.
+        
+        tuplo_posicoes_l = () 
+        tuplo_posicoes_adv = () 
 
-        pass
+        posicoes_livres_l = posicoes_livres_aux(tabuleiro_rodado_l) # Obter as posições livres.
+        posicoes_livres_adv = posicoes_livres_aux(tabuleiro_rodado_adv) # Obter as posições livres.
 
-    pass
+        n = obtem_numero_orbitas(t)
+
+        for l in range(2 * n, 0, -1): # Percorrer as valores de l, que vão de k até 1.
+            for posicao_livre in posicoes_livres_l:
+                novo_tabuleiro = cria_copia_tabuleiro(tabuleiro_rodado_l) # Cópia do tabuleiro.
+
+                # Caso do jogador:
+                tabuleiro_hipotetico = coloca_pedra(novo_tabuleiro, posicao_livre, j)
+                chegou_ao_l = verifica_linha_pedras(tabuleiro_hipotetico, posicao_livre, j, l) # Verificar se chegou a l peças.
+                if chegou_ao_l:
+                    tuplo_posicoes_l += (posicao_livre, ) # Adicionar a posição ao tuplo.
+
+            for posicao_livre in posicoes_livres_adv:   
+                novo_tabuleiro = cria_copia_tabuleiro(tabuleiro_rodado_adv) # Cópia do tabuleiro.
+                # Caso do adversário:
+                tabuleiro_hipotetico_adv = coloca_pedra(novo_tabuleiro, posicao_livre, - j)
+                chegou_ao_l_adv = verifica_linha_pedras(tabuleiro_hipotetico_adv, posicao_livre, -j, l)
+                if chegou_ao_l_adv:
+                    tuplo_posicoes_adv += (posicao_livre, )
+
+            if len(tuplo_posicoes_l) != 0: # Serve para não retornar um tuplo vazio para as posições do jogador.
+                posicoes_convertidas = map(lambda x: obtem_posicao_seguinte(tabuleiro_rodado_l, x, True), tuplo_posicoes_l)
+                return ordena_posicoes(posicoes_convertidas, n)
+            
+            elif len(tuplo_posicoes_adv) != 0: # Serve para não retornar um tuplo vazio para as posições do adversário.
+                posicoes_convertidas_1 = map(lambda x: obtem_posicao_seguinte(tabuleiro_rodado_adv, x, True), tuplo_posicoes_adv)
+                posicoes_convertidas_2 = map(lambda x: obtem_posicao_seguinte(tabuleiro_rodado_l, x, True), posicoes_convertidas_1)
+                return ordena_posicoes(posicoes_convertidas_2, n)
+
+        return ()
+
+    possibilidades = ()
+    n = obtem_numero_orbitas(t) 
+
+    # Posições correspondentes à estratégia escolhida.
+    if lvl == "facil":
+        possibilidades = estrategia_escolhida_facil_aux()
+    elif lvl == "normal":
+        possibilidades = estrategia_escolhida_normal_aux()
+
+    posicao_escolhida_auto = ordena_posicoes(possibilidades, n)[0] 
+    
+    return posicao_escolhida_auto
 
 def orbito(n, modo, jog):
 
@@ -913,4 +998,88 @@ def orbito(n, modo, jog):
     Os argumentos são do tipo int, str e str, respetivamente.
     """
 
-    pass
+
+    condicao_esperada = type(n) == int and type(modo) == str and type(jog) == str # verificar modos
+
+    if not condicao_esperada:
+        raise ValueError('orbito: argumentos invalidos')
+
+    else:
+        jog_convertido = str_para_pedra(jog) # Conversão do jogador para inteiro.
+        modos_computador = ('facil', 'normal')           
+        print(f"Bem-vindo ao ORBITO-{n}.")
+        if modo in modos_computador:
+            print(f"Jogo contra o computador ({modo}).")
+            if jog_convertido == 1:
+                print("O jogador joga com 'X'.")
+            else:
+                print("O jogador joga com 'O'.")
+        else:
+            print(f"Jogo para dois jogadores.")
+
+        tab_atual = cria_tabuleiro_vazio(n) # Criação do tabuleiro vazio.
+
+        jogador_atual = 1
+        
+        representacao_tab_inicio = tabuleiro_para_str(tab_atual) # Representação do tabuleiro inicial.
+        print(representacao_tab_inicio)
+        
+
+        while not eh_fim_jogo(tab_atual): # Enquanto o jogo não terminar.
+            if modo in modos_computador:
+                if jog_convertido == jogador_atual: # Ronda do jogador humano
+
+                    print("Turno do jogador.")
+                    escolha_posicao_jog = escolhe_movimento_manual(tab_atual) # Escolha da posição pelo jogador - manualmente.
+                    tab_atual = coloca_pedra(tab_atual, escolha_posicao_jog, jog_convertido) # Marcação da posição escolhida pelo jogador, manualmente.
+
+                
+                else: # Ronda do jogador automático
+
+                    print(f"Turno do computador ({modo}):") # Turno do computador.
+                    posicao_auto = escolhe_movimento_auto(tab_atual, - jog_convertido, modo) # Escolha da posição pelo computador - de acordo com a estratégia escolhida.
+                    tab_atual = coloca_pedra(tab_atual, posicao_auto, -jog_convertido) 
+            else:
+                pedra_jogador_str = pedra_para_str(jogador_atual)
+                print(f"Turno do jogador '{pedra_jogador_str}'.")
+                escolha_posicao_jog = escolhe_movimento_manual(tab_atual)
+                tab_atual = coloca_pedra(tab_atual, escolha_posicao_jog, jogador_atual)
+
+            tab_atual = roda_tabuleiro(tab_atual) # Rodar o tabuleiro.
+            print(tabuleiro_para_str(tab_atual)) # Representação do tabuleiro após a marcação da posição.
+
+            jogador_atual = - jogador_atual # Alternância dos jogadores.
+
+            
+        # Resultado final do jogo.
+        jog_j_ganhou = False
+        jog_adv_ganhou = False
+
+        for posicao in obtem_posicoes_pedra(tab_atual, jog_convertido):
+
+            if verifica_linha_pedras(tab_atual, posicao, jog_convertido, 2 * n):
+                jog_j_ganhou = True
+            
+        for posicao in obtem_posicoes_pedra(tab_atual, -jog_convertido):
+            if verifica_linha_pedras(tab_atual, posicao, -jog_convertido, 2 * n):
+                jog_adv_ganhou = True
+            
+        if jog_j_ganhou == jog_adv_ganhou:
+            print('EMPATE')
+            return 0
+        
+        elif jog_j_ganhou:
+            if modo in modos_computador:
+                print('VITORIA')
+            else:
+                jog_convertido_str = pedra_para_str(jog_convertido)
+                print(f"VITORIA DO JOGADOR '{jog_convertido_str}'") 
+            return jog_convertido
+        
+        else:
+            if modo in modos_computador:
+                print('DERROTA')
+            else:
+                jog_convertido_str = pedra_para_str(-jog_convertido)
+                print(f"VITORIA DO JOGADOR '{jog_convertido_str}'") 
+            return -jog_convertido
