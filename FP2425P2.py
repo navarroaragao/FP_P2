@@ -37,7 +37,7 @@ def obtem_pos_lin(pos):
 
     return int(pos[1:])
 
-def eh_posicao(arg): # Tratar de mais coisas
+def eh_posicao(arg):
 
     """
     A função eh_posicao recebe um argumento e verifica se é uma posição válida.
@@ -91,37 +91,7 @@ def indice_coluna_posicao_aux(letra_coluna):
     O argumento letra_coluna é do tipo str.
     """
 
-    return ord(letra_coluna) - ord("a")
-
-def indice_orbita_aux(posicao, n):
-
-    """
-    A função indice_orbita_aux é uma função auxiliar que recebe uma posição e o número de órbitas.
-    Os argumentos posicao e n são do tipo string e inteiro.
-    A função retorna o índice da órbita onde se encontra a posicao (ou seja, do tipo inteiro).
-    NOTA: A orbital interior é a de índice 0.
-    """
-
-    col = obtem_pos_col(posicao)
-    lin = obtem_pos_lin(posicao)
-    index_coluna_pos = indice_coluna_posicao_aux(col)
-    index_linha_pos = indice_linha_posicao_aux(lin)
-    tamanho_lado = tamanho_lado_tabuleiro_aux(n)
-    
-    # A posição surge como índice da linha, índice da coluna.
-    posicao = (index_linha_pos, index_coluna_pos)
-
-    # Descobrir a orbital da posição.
-    # Dividindo o tabuleiro ao meio, obtemos a posição espelhada.
-    # A posição espelhada é a posição que está tabuleiro.
-    posicao_espelhada = (min(posicao[0], tamanho_lado - 1 - posicao[0]), min(posicao[1], tamanho_lado - 1 - posicao[1]))
-
-    posicao_diagonal_invertida = (min(posicao_espelhada[0], posicao_espelhada[1]), min(posicao_espelhada[0], posicao_espelhada[1])) 
-    orbita_invertida = posicao_diagonal_invertida[0]
-    orbita = n - orbita_invertida - 1
-
-    return orbita
-
+    return ord(letra_coluna) - ord("a") # A letra 'a' corresponde ao índice 0. E os restantes vêm por comparação.
 
 def tamanho_lado_tabuleiro_aux(n):
 
@@ -132,6 +102,36 @@ def tamanho_lado_tabuleiro_aux(n):
     """
 
     return 2 * n
+
+def indice_orbita_aux(posicao, n):
+
+    """
+    A função indice_orbita_aux é uma função auxiliar que recebe uma posição e o número de órbitas.
+    Os argumentos posicao e n são do tipo string e inteiro.
+    A função retorna o índice da órbita onde se encontra a posicao (ou seja, do tipo inteiro).
+    NOTA: A orbital interior é a de índice 0.
+    """
+    # Localização da posição no tabuleiro.
+    col = obtem_pos_col(posicao)
+    lin = obtem_pos_lin(posicao)
+    # Índices da linha e da coluna da posição.
+    index_coluna_pos = indice_coluna_posicao_aux(col)
+    index_linha_pos = indice_linha_posicao_aux(lin)
+    tamanho_lado = tamanho_lado_tabuleiro_aux(n)
+    
+    # O tuplo da posição surge como índice da linha, índice da coluna.
+    posicao = (index_linha_pos, index_coluna_pos)
+
+    # Descobrir a orbital da posição.
+    # Dividindo o tabuleiro ao meio, obtemos a posição espelhada.
+    # A posição espelhada é a posição que está no tabuleiro.
+    posicao_espelhada = (min(posicao[0], tamanho_lado - 1 - posicao[0]), min(posicao[1], tamanho_lado - 1 - posicao[1]))
+
+    posicao_diagonal_invertida = (min(posicao_espelhada[0], posicao_espelhada[1]), min(posicao_espelhada[0], posicao_espelhada[1])) 
+    orbita_invertida = posicao_diagonal_invertida[0]
+    orbita = n - orbita_invertida - 1 # Os índices da órbita começam na mais interior.
+
+    return orbita
 
 def eh_posicao_valida(p, n):
 
@@ -182,8 +182,8 @@ def obtem_posicoes_adjacentes(p, n, d):
         if not d and not condicao_ortogonal:
             continue
 
-        # verificação das condições para que a posição adjacente seja válida.
-        nova_col = chr(index_coluna + ord("a")) # Conversão índices das linhas e colunas para posição.
+        # Conversão índices das linhas e colunas para posição.
+        nova_col = chr(index_coluna + ord("a")) 
         nova_lin = index_linha + 1
         nova_posicao = cria_posicao(nova_col, nova_lin) 
 
@@ -204,9 +204,10 @@ def ordena_posicoes(t, n):
         lin = obtem_pos_lin(p)
         index_coluna_pos = indice_coluna_posicao_aux(col)
         index_linha_pos = indice_linha_posicao_aux(lin)
-        orbital = indice_orbita_aux(p, n)
+        orbita = indice_orbita_aux(p, n)
 
-        return (orbital, index_linha_pos, index_coluna_pos) # ordem de prioridade de ordenação de posições
+        # ordem de prioridade de ordenação de posições (orbita, linha, coluna)
+        return (orbita, index_linha_pos, index_coluna_pos) 
     
     tuplo_ordenado = sorted(t, key = lambda x: computa_valores(x, n))
 
@@ -224,7 +225,7 @@ def cria_pedra_branca():
     A função retorna o valor da pedra branca, ou seja, um inteiro.
     """
 
-    return -1
+    return pedras[0]
 
 def cria_pedra_preta():
 
@@ -233,7 +234,7 @@ def cria_pedra_preta():
     A função retorna o valor da pedra preta, ou seja, um inteiro.
     """
 
-    return 1
+    return pedras[1]
 
 def cria_pedra_neutra():
 
@@ -242,7 +243,7 @@ def cria_pedra_neutra():
     A função retorna o valor da pedra neutra, ou seja, um inteiro.
     """
 
-    return 0
+    return pedras[2]
 
 def eh_pedra(arg):
 
@@ -261,7 +262,7 @@ def eh_pedra_branca(p):
     A função retorna um valor booleano.
     """
 
-    return p == -1
+    return p == cria_pedra_branca()
 
 def eh_pedra_preta(p):
 
@@ -271,7 +272,7 @@ def eh_pedra_preta(p):
     A função retorna um valor booleano.
     """
 
-    return p == 1
+    return p == cria_pedra_preta()
 
 def pedras_iguais(p1, p2):
 
@@ -293,15 +294,24 @@ def pedra_para_str(p):
 
     return ('O' if eh_pedra_branca(p) else 'X' if eh_pedra_preta(p) else ' ')
 
+def inverte_pedra(p):
+
+    """
+    A função inverte_pedra recebe uma pedra e inverte a pedra.
+    O argumento p é do tipo int.
+    A função retorna a pedra invertida.
+    """
+
+    return - p
+
 def eh_pedra_jogador(p): 
     
     """
     A função eh_pedra_jogador recebe uma pedra e verifica se é de um jogador.
-    O argumento p é do tipo str.
     A função retorna um valor booleano.
     """
 
-    return p in (1, -1) 
+    return p == cria_pedra_branca() or p == cria_pedra_preta() 
 
 def pedra_para_int(p):
 
@@ -318,15 +328,17 @@ def str_para_pedra(str):
     """
     A função str_para_pedra recebe uma string e devolve a pedra correspondente.
     O argumento str é do tipo str.
-    A função retorna a pedra do jogador em formato de string.
+    A função retorna a pedra do jogador em formato inteiro.
     """
-    pedra_preta = cria_pedra_preta()
+    pedra_preta = cria_pedra_preta() # Conversão para a pedra preta
     if pedra_para_str(pedra_preta) == str:
         return pedra_preta
-    pedra_branca = cria_pedra_branca()
+    
+    pedra_branca = cria_pedra_branca() # Conversão para a pedra branca
     if pedra_para_str(pedra_branca) == str:
         return pedra_branca
-    return cria_pedra_neutra()
+    
+    return cria_pedra_neutra() # Conversão para a pedra neutra
 
 # 3.º TAD
 
@@ -345,7 +357,7 @@ def cria_tabuleiro_vazio(n):
         raise ValueError('cria_tabuleiro_vazio: argumento invalido')
     
     for index_col in range(0, (2 * n)):
-        tabuleiro_linhas = {}
+        tabuleiro_linhas = {} 
         for index_lin in range (1, ( 2 * n) + 1):
             tabuleiro_linhas[index_lin] = cria_pedra_neutra()
         tabuleiro_final[letras_col[index_col]] = tabuleiro_linhas
@@ -475,8 +487,8 @@ def obtem_linhas_diagonais(t, p):
     col = obtem_pos_col(p)
     lin = obtem_pos_lin(p)
 
-    pos_index = (indice_coluna_posicao_aux(col), indice_linha_posicao_aux(lin)) # tuplo com os índices da linha da posição (pos) e da coluna da posição (pos).
-
+    # tuplo com os índices da coluna da posição (pos) e da linha da posição (pos).
+    pos_index = (indice_coluna_posicao_aux(col), indice_linha_posicao_aux(lin)) 
     pos_inicial_index = pos_index
     fora_tab = False
 
@@ -530,12 +542,13 @@ def obtem_linhas_diagonais(t, p):
 
     return (tuplo_diagonais, tuplo_antidiagonais)
 
-tuplo_quadrantes = ((True, False), (True, True), (False, True), (False, False))
-tuplo_quadrante_movimentos = (
-    ((1, 0),(0, 1)),
-    ((-1, 0),(0, 1)),
-    ((-1, 0), (0, -1)),
-    ((1, 0), (0, -1)))
+tuplo_quadrantes = ((True, False), (True, True), (False, True), (False, False)) # Carcterização de cada quadrante
+
+tuplo_quadrante_movimentos = ( # Movimentos possíveis em cada quadrante (numeração dos quadrantes é feita no sentido horário)
+    ((1, 0),(0, 1)), # 1.º quadrante
+    ((-1, 0),(0, 1)), # 2.º quadrante
+    ((-1, 0), (0, -1)), # 3.º quadrante
+    ((1, 0), (0, -1)))  # 4.º quadrante
 
 def obtem_orbita(t, p):
 
@@ -552,13 +565,12 @@ def obtem_orbita(t, p):
     index_coluna = indice_coluna_posicao_aux(col)
     index_linha = indice_linha_posicao_aux(lin)
     index_orbita = indice_orbita_aux(p,n)
-
     tamanho_lado = tamanho_lado_tabuleiro_aux(obtem_numero_orbitas(t))
-
 
     posicao_inicial_index = (index_coluna, index_linha)
     posicao_atual_index = posicao_inicial_index
     posicoes_orbita = ()
+
     while posicao_atual_index != posicao_inicial_index or len(posicoes_orbita) == 0:
         
         index_linha_passa_metade = posicao_atual_index[1] >= (tamanho_lado // 2)
@@ -566,21 +578,22 @@ def obtem_orbita(t, p):
 
         tuplo_index_passa_metade = (index_coluna_passa_metade, index_linha_passa_metade)
 
-        quadrante = tuplo_quadrantes.index(tuplo_index_passa_metade)
-        movimentos = tuplo_quadrante_movimentos[quadrante]
+        quadrante = tuplo_quadrantes.index(tuplo_index_passa_metade) # Determinar o quadrante onde se encontra a posição.
+        movimentos = tuplo_quadrante_movimentos[quadrante] # Movimentos possíveis no quadrante.
 
         for movimento in movimentos:
             posicao_nova_index = (posicao_atual_index[0] + movimento[0], posicao_atual_index[1] + movimento[1])
 
-            if not (0 <= posicao_nova_index[0] < tamanho_lado and 0 <= posicao_nova_index[1] < tamanho_lado):
+            # Verificar se a posição nova está dentro do tabuleiro.
+            if not (0 <= posicao_nova_index[0] < tamanho_lado and 0 <= posicao_nova_index[1] < tamanho_lado): 
                 continue
 
             posicao_nova = cria_posicao(letras_col[posicao_nova_index[0]], posicao_nova_index[1] + 1)
             index_orbita_posicao_nova = indice_orbita_aux(posicao_nova, n)
 
-            if index_orbita_posicao_nova == index_orbita:
+            if index_orbita_posicao_nova == index_orbita: # Verificar se a posição nova está na órbita.
                 posicoes_orbita += (posicao_nova, )
-                posicao_atual_index = posicao_nova_index
+                posicao_atual_index = posicao_nova_index # Atualização da posição atual.
                 break
 
     return posicoes_orbita
@@ -665,14 +678,14 @@ def tabuleiros_iguais(t1, t2):
     if not eh_tabuleiro(t1) or not eh_tabuleiro(t2):
         return False
     
-    if t1.keys() != t2.keys():
+    if t1.keys() != t2.keys(): # Verificação das colunas.
         return False
     
     for col in t1:
-        if t1[col].keys() != t2[col].keys():
+        if t1[col].keys() != t2[col].keys(): # Verificação das linhas.
             return False
         for lin in t1[col]:
-            if t1[col][lin] != t2[col][lin]:
+            if t1[col][lin] != t2[col][lin]: # Verificação das pedras.
                 return False
             
     return True
@@ -690,21 +703,21 @@ def tabuleiro_para_str(t):
     n = obtem_numero_orbitas(t)
 
 
-    linha_colunas = '   '.join(t.keys())
-    representacao_tab += '    ' + linha_colunas + '\n'
+    linha_colunas = '   '.join(t.keys()) # concatenação das letras das colunas com um espaçamento definido.
+    representacao_tab += '    ' + linha_colunas + '\n' 
     separador_linhas = '    ' + '   '.join(map(lambda x: '|', t.keys())) + '\n'
 
     for linha in range(1, 2 * n + 1):
 
         posicoes_formatadas = []
         for coluna in t:
-            posicoes_formatadas += ['[' + pedra_para_str(t[coluna][linha]) + ']']
+            posicoes_formatadas += ['[' + pedra_para_str(t[coluna][linha]) + ']'] # representaçao das pedras em formato de string.
 
-        representacao_tab += f"{linha:02}" + ' ' + '-'.join(posicoes_formatadas) + '\n' 
+        representacao_tab += f"{linha:02}" + ' ' + '-'.join(posicoes_formatadas) + '\n' # representação das linhas do tabuleiro.
         if linha < 2 * n:
-            representacao_tab += separador_linhas
+            representacao_tab += separador_linhas # representação do separador de linhas do tabuleiro.
     
-    representacao_tab = representacao_tab.rstrip()
+    representacao_tab = representacao_tab.rstrip() # eliminação de espaços em branco no final do tabuleiro.
     return representacao_tab
 
 def move_pedra(t, p1, p2):
@@ -741,7 +754,7 @@ def obtem_posicao_seguinte(t, p, s):
     """
 
     orbita_posicao = obtem_orbita(t, p)
-    index_orbita_posicao = orbita_posicao.index(p)
+    index_orbita_posicao = orbita_posicao.index(p) # índice da posição na órbita.
 
     variacao = 1 if s else -1
     index_posicao_seguinte = (index_orbita_posicao + variacao) % len(orbita_posicao)
@@ -758,9 +771,11 @@ def roda_tabuleiro(t):
     backup_tabuleiro = cria_copia_tabuleiro(t)
 
     for col in backup_tabuleiro:
-        for linha in backup_tabuleiro[col]:
-            posicao_atual = cria_posicao(col, linha)
-            posicao_seguinte = obtem_posicao_seguinte(backup_tabuleiro, posicao_atual, False)
+        for linha in backup_tabuleiro[col]: 
+            posicao_atual = cria_posicao(col, linha) 
+
+            # Obter a posição seguinte no sentido anti-horário.
+            posicao_seguinte = obtem_posicao_seguinte(backup_tabuleiro, posicao_atual, False) 
             pedra = obtem_pedra(backup_tabuleiro, posicao_atual)
 
             t = coloca_pedra(t, posicao_seguinte, pedra)
@@ -829,7 +844,7 @@ def eh_vencedor(t, j):
     tamanho_lado = tamanho_lado_tabuleiro_aux(n)
 
     for posicao in posicoes_jogador:
-        if verifica_linha_pedras(t,posicao, j, tamanho_lado):
+        if verifica_linha_pedras(t,posicao, j, tamanho_lado): # Verificar se o jogador tem uma linha completa.
             return True
     return False
 
@@ -843,12 +858,12 @@ def eh_fim_jogo(t):
     """
 
     for j in (cria_pedra_branca(), cria_pedra_preta()):
-        if eh_vencedor(t, j):
+        if eh_vencedor(t, j): # Verificar se um dos jogadores é vencedor.
             return True
 
-    for col in t:
+    for col in t: 
         for lin in t[col]:
-            if t[col][lin] == 0:
+            if t[col][lin] == 0: # Verificar se existem posições livres.
                 return False
             
     return True
@@ -919,7 +934,8 @@ def escolhe_movimento_auto(t, j, lvl):
         else:
             posicoes_escolhidas = posicoes_livres
 
-        posicoes_convertidas = map(lambda x: obtem_posicao_seguinte(tabuleiro_rodado, x, True), posicoes_escolhidas)
+        # Transformador de posições: obter a posição seguinte no sentido horário.
+        posicoes_convertidas = map(lambda x: obtem_posicao_seguinte(tabuleiro_rodado, x, True), posicoes_escolhidas) 
 
         return ordena_posicoes(posicoes_convertidas, n)
 
@@ -1006,6 +1022,7 @@ def orbito(n, modo, jog):
 
     else:
         jog_convertido = str_para_pedra(jog) # Conversão do jogador para inteiro.
+        jog_adv = inverte_pedra(jog_convertido) # Conversão do jogador adversário.
         modos_computador = ('facil', 'normal')           
         print(f"Bem-vindo ao ORBITO-{n}.")
         if modo in modos_computador:
@@ -1019,7 +1036,7 @@ def orbito(n, modo, jog):
 
         tab_atual = cria_tabuleiro_vazio(n) # Criação do tabuleiro vazio.
 
-        jogador_atual = 1
+        jogador_atual = str_para_pedra('X') # Inicialização do jogador das pretas pretas.
         
         representacao_tab_inicio = tabuleiro_para_str(tab_atual) # Representação do tabuleiro inicial.
         print(representacao_tab_inicio)
@@ -1037,8 +1054,10 @@ def orbito(n, modo, jog):
                 else: # Ronda do jogador automático
 
                     print(f"Turno do computador ({modo}):") # Turno do computador.
-                    posicao_auto = escolhe_movimento_auto(tab_atual, - jog_convertido, modo) # Escolha da posição pelo computador - de acordo com a estratégia escolhida.
-                    tab_atual = coloca_pedra(tab_atual, posicao_auto, -jog_convertido) 
+                    # Escolha da posição pelo computador - de acordo com a estratégia escolhida.
+
+                    posicao_auto = escolhe_movimento_auto(tab_atual,jog_adv, modo) 
+                    tab_atual = coloca_pedra(tab_atual, posicao_auto, jog_adv) 
             else:
                 pedra_jogador_str = pedra_para_str(jogador_atual)
                 print(f"Turno do jogador '{pedra_jogador_str}'.")
@@ -1048,7 +1067,7 @@ def orbito(n, modo, jog):
             tab_atual = roda_tabuleiro(tab_atual) # Rodar o tabuleiro.
             print(tabuleiro_para_str(tab_atual)) # Representação do tabuleiro após a marcação da posição.
 
-            jogador_atual = - jogador_atual # Alternância dos jogadores.
+            jogador_atual = inverte_pedra(jogador_atual) # Alternância dos jogadores.
 
             
         # Resultado final do jogo.
@@ -1060,8 +1079,8 @@ def orbito(n, modo, jog):
             if verifica_linha_pedras(tab_atual, posicao, jog_convertido, 2 * n):
                 jog_j_ganhou = True
             
-        for posicao in obtem_posicoes_pedra(tab_atual, -jog_convertido):
-            if verifica_linha_pedras(tab_atual, posicao, -jog_convertido, 2 * n):
+        for posicao in obtem_posicoes_pedra(tab_atual, jog_adv):
+            if verifica_linha_pedras(tab_atual, posicao, jog_adv, 2 * n):
                 jog_adv_ganhou = True
             
         if jog_j_ganhou == jog_adv_ganhou:
@@ -1082,4 +1101,4 @@ def orbito(n, modo, jog):
             else:
                 jog_convertido_str = pedra_para_str(-jog_convertido)
                 print(f"VITORIA DO JOGADOR '{jog_convertido_str}'") 
-            return -jog_convertido
+            return jog_adv
