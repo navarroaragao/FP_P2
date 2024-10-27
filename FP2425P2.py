@@ -374,10 +374,8 @@ def cria_tabuleiro(n, tp, tb):
     """
 
     condicao_tuplos = (type(tp) == tuple and type(tb) == tuple and 2 <= n <= 5)
-    condicao_tuplo_pretas = all(eh_posicao(elemento) for elemento in tp)
-    condicao_tuplo_brancas = all(eh_posicao(elemento) for elemento in tb)
-
-    eh_posicao_valida
+    condicao_tuplo_pretas = all(eh_posicao(elemento) for elemento in tp) and all(type(elemento) == str for elemento in tp)
+    condicao_tuplo_brancas = all(eh_posicao(elemento) for elemento in tb) and all(type(elemento) == str for elemento in tb)
 
     
     if not (condicao_tuplos and condicao_tuplo_pretas and condicao_tuplo_brancas):
