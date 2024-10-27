@@ -13,7 +13,7 @@ def cria_posicao(col, lin):
     A função verifica se os argumentos são válidos, caso contrário, devolve um erro.
     """
 
-    if not (isinstance(col, str) and isinstance(lin, int) and col in letras_col and 1 <= lin <= 10):
+    if not (type(col) == str and type(lin) == int and col in letras_col and 1 <= lin <= 10):
         raise ValueError("cria_posicao: argumentos invalidos")
     return col + str(lin)
 
@@ -45,7 +45,7 @@ def eh_posicao(arg):
     A função retorna um valor booleano.
     """
 
-    return isinstance(arg, str) and arg[0] in letras_col and 1 <= arg[1:] <= 10 
+    return type(arg) == str and arg[0] in letras_col and 1 <= int(arg[1:]) <= 10 
 
 def posicoes_iguais(p1, p2):
 
@@ -353,7 +353,7 @@ def cria_tabuleiro_vazio(n):
 
     tabuleiro_final = {} 
 
-    if not(isinstance(n, int) and 2 <= n <= 5):
+    if not((type(n) == int) and 2 <= n <= 5):
         raise ValueError('cria_tabuleiro_vazio: argumento invalido')
     
     for index_col in range(0, (2 * n)):
@@ -372,11 +372,11 @@ def cria_tabuleiro(n, tp, tb):
     A função retorna um dicionário, que representa um tabuleiro com as posições das pedras.
     A função verifica se os argumentos são válidos, caso contrário, devolve um erro.
     """
-
-    tabuleiro = cria_tabuleiro_vazio(n)
     
-    if not (isinstance(tp, tuple) and isinstance(tb, tuple) and 2 <= n <= 5):
+    if not (type(tp) == tuple and type(tb) == tuple and 2 <= n <= 5):
         raise ValueError('cria_tabuleiro: argumentos invalidos')
+    
+    tabuleiro = cria_tabuleiro_vazio(n)
     
     for p in tp:
 
@@ -655,11 +655,11 @@ def eh_tabuleiro(arg):
     A função retorna um valor booleano.
     """
 
-    if not (isinstance(arg, dict) and 4 <= len(arg) <= 10):
+    if not (type(arg) == dict and 4 <= len(arg) <= 10):
         return False
     
     for col in arg:
-        if not (col in letras_col and isinstance(arg[col], dict) and 4 <= len(arg[col]) <= 10):
+        if not (col in letras_col and type(arg[col]) == dict and 4 <= len(arg[col]) <= 10):
             return False
         for lin in arg[col]:
             if not (1 <= lin <= 10 and eh_pedra(arg[col][lin])):
