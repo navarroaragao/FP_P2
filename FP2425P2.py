@@ -172,8 +172,8 @@ def obtem_posicoes_adjacentes(p, n, d):
         index_linha = index_linha_pos + variacao[1]
 
         # condição que verifica se está dentro do tabuleiro
-        condicao_linha_esperada = 0 <= index_linha <= tamanho_lado
-        condicao_coluna_esperada = 0 <= index_coluna <= tamanho_lado
+        condicao_linha_esperada = 0 <= index_linha < tamanho_lado
+        condicao_coluna_esperada = 0 <= index_coluna < tamanho_lado
         if not condicao_linha_esperada or not condicao_coluna_esperada: # verificamos se entramos nas ortogonais ou adjacentes.
             continue
 
@@ -374,11 +374,13 @@ def cria_tabuleiro(n, tp, tb):
     """
 
     condicao_tuplos = (type(tp) == tuple and type(tb) == tuple and 2 <= n <= 5)
-    condicao_tuplo_pretas = all(eh_posicao(elemento) for elemento in tp) and all(type(elemento) == str for elemento in tp)
-    condicao_tuplo_brancas = all(eh_posicao(elemento) for elemento in tb) and all(type(elemento) == str for elemento in tb)
-
+    if not condicao_tuplos:
+        raise ValueError('cria_tabuleiro: argumentos invalidos')
     
-    if not (condicao_tuplos and condicao_tuplo_pretas and condicao_tuplo_brancas):
+    condicao_tuplo_pretas = all(eh_posicao(elemento) for elemento in tp) 
+    condicao_tuplo_brancas = all(eh_posicao(elemento) for elemento in tb) 
+    
+    if not (condicao_tuplo_pretas and condicao_tuplo_brancas):
         raise ValueError('cria_tabuleiro: argumentos invalidos')
     
     tabuleiro = cria_tabuleiro_vazio(n)
@@ -735,16 +737,12 @@ def move_pedra(t, p1, p2):
     # primeira posição:
     col_p1 = obtem_pos_col(p1)
     lin_p1 = obtem_pos_lin(p1)
-    index_lin_p1 = indice_linha_posicao_aux(lin_p1)
-    index_col_p1 = indice_coluna_posicao_aux(col_p1)
 
     col_p2 = obtem_pos_col(p2)
     lin_p2 = obtem_pos_lin(p2)
-    index_lin_p2 = indice_linha_posicao_aux(lin_p2)
-    index_col_p2 = indice_coluna_posicao_aux(col_p2)
 
-    t[index_col_p2][index_lin_p2] = t[index_col_p1][index_lin_p1]
-    t[index_col_p1][index_lin_p1] = cria_pedra_neutra()
+    t[col_p2][lin_p2] = t[col_p1][lin_p1]
+    t[col_p1][lin_p1] = cria_pedra_neutra()
 
     return t
 
@@ -1020,7 +1018,7 @@ def orbito(n, modo, jog):
     """
 
 
-    condicao_esperada = type(n) == int and type(modo) == str and type(jog) == str # verificar modos
+    condicao_esperada = type(modo) == str and type(jog) == str # verificar modos
 
     if not condicao_esperada:
         raise ValueError('orbito: argumentos invalidos')
@@ -1104,6 +1102,6 @@ def orbito(n, modo, jog):
             if modo in modos_computador:
                 print('DERROTA')
             else:
-                jog_convertido_str = pedra_para_str(-jog_convertido)
+                jog_convertido_str = pedra_para_str(jog_adv)
                 print(f"VITORIA DO JOGADOR '{jog_convertido_str}'") 
             return jog_adv
