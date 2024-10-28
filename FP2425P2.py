@@ -70,7 +70,7 @@ def posicao_para_str(pos):
 def str_para_posicao(str): 
 
     """
-    A função str_para_posicao recebe uma string e devolve a posição correspondente. 
+    A função str_para_posicao recebe uma string e devolve a posição correspondente (string). 
     """
 
     return str
@@ -250,6 +250,7 @@ def eh_pedra(arg):
     """
     A função eh_pedra recebe um argumento e verifica se é uma pedra válida.
     O argumento arg é do tipo universal.
+    A função retorna um valor booleano.
     """
 
     return arg in pedras
@@ -411,7 +412,7 @@ def cria_copia_tabuleiro(t):
     """
     A função cria_copia_tabuleiro recebe um tabuleiro e devolve uma cópia do tabuleiro.
     O argumento t é do tipo dict.
-    A função retorna um dicionário, cópia do tabuleiro, t.
+    A função retorna um dicionário (dict), cópia do tabuleiro, t.
     """
 
     t_novo = {} 
@@ -804,11 +805,9 @@ def verifica_linha_pedras(t, p, j, k):
     def conta_pecas_consecutivas_aux(elementos):
 
         """
-        
         A função conta_pecas_consecutivas é uma função auxiliar à função verifica_linhas_pedras que recebe um argumento (elementos).
         A função devolve um booleano:
             True se existirem k ou mais peças consecutivas do jogador (j) e False caso contrário.
-        
         """
 
         contador = 0
@@ -1015,6 +1014,7 @@ def orbito(n, modo, jog):
     A função orbito é a função principal do jogo Orbito.
     A função orbito recebe o número de órbitas, o modo de jogo e o jogador.
     Os argumentos são do tipo int, str e str, respetivamente.
+    A função retorna o jogador vencedor (inteiro).
     """
 
 
