@@ -1105,3 +1105,4 @@ def orbito(n, modo, jog):
                 jog_convertido_str = pedra_para_str(jog_adv)
                 print(f"VITORIA DO JOGADOR '{jog_convertido_str}'") 
             return jog_adv
+        
