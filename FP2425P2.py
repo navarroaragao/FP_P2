@@ -45,7 +45,7 @@ def eh_posicao(arg):
     A função retorna um valor booleano.
     """
 
-    return type(arg) == str and arg[0] in letras_col and 1 <= int(arg[1:]) <= 10 
+    return type(arg) == str and arg[0] in letras_col and arg[1:].isnumeric() and 1 <= int(arg[1:]) <= 10 
 
 def posicoes_iguais(p1, p2):
 
